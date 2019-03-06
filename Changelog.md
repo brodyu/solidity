@@ -4,6 +4,7 @@ Language Features:
 
 
 Compiler Features:
+ * SMTChecker: Support enums without typecast.
  * SMTChecker: Support one-dimensional arrays.
 
 
