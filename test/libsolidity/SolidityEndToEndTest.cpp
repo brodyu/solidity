@@ -8085,6 +8085,30 @@ BOOST_AUTO_TEST_CASE(calldata_struct)
 	ABI_CHECK(callContractFunction("f((uint256,uint256))", encodeArgs(u256(42), u256(23))), encodeArgs(u256(42), u256(23)));
 }
 
+BOOST_AUTO_TEST_CASE(calldata_struct_dynamic)
+{
+	char const* sourceCode = R"(
+	    pragma experimental ABIEncoderV2;
+		contract C {
+			struct S { uint256[] a; }
+			function f(S calldata s) external pure returns (uint256) {
+			    return 42;
+			}
+			function g(S calldata s) external pure returns (uint256) {
+			    return s.a.length;
+			}
+			function h(S calldata s) external pure returns (uint256 a, uint256 b, uint256 c) {
+			    return (s.a.length, s.a[0], s.a[1]);
+			}
+		}
+	)";
+	compileAndRun(sourceCode, 0, "C");
+
+	ABI_CHECK(callContractFunction("f((uint256[]))", 0x20, 0x20, 0), encodeArgs(42));
+	ABI_CHECK(callContractFunction("g((uint256[]))", 0x20, 0x20, 0), encodeArgs(0));
+	ABI_CHECK(callContractFunction("h((uint256[]))", 0x20, 0x20, 2, 0x42, 0x23), encodeArgs(2, 0x42, 0x23));
+}
+
 BOOST_AUTO_TEST_CASE(calldata_struct_and_ints)
 {
 	char const* sourceCode = R"(

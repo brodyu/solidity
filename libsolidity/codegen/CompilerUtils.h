@@ -65,6 +65,10 @@ public:
 	/// Stack post:
 	void revertWithStringData(Type const& _argumentType);
 
+	/// Stack pre: base_ref tail_ptr
+	/// Stack post: tail_ref [length]
+	void accessTail(Type const& _type);
+
 	/// Loads data from memory to the stack.
 	/// @param _offset offset in memory (or calldata)
 	/// @param _type data type to load

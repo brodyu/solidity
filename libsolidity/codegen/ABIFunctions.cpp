@@ -1248,7 +1248,6 @@ string ABIFunctions::abiDecodingFunction(Type const& _type, bool _fromMemory, bo
 		if (structType->dataStoredIn(DataLocation::CallData))
 		{
 			solAssert(!_fromMemory, "");
-			solUnimplementedAssert(!structType->isDynamicallyEncoded(), "Dynamically encoded calldata structs are not yet implemented.");
 			return abiDecodingFunctionCalldataStruct(*structType);
 		}
 		else
@@ -1437,13 +1436,13 @@ string ABIFunctions::abiDecodingFunctionCalldataStruct(StructType const& _type)
 		_type.identifier();
 
 	return createFunction(functionName, [&]() {
-		Whiskers w{R"(
+		Whiskers w(R"(
 				// <readableTypeName>
 				function <functionName>(offset, end) -> value {
 					if slt(sub(end, offset), <minimumSize>) { revert(0, 0) }
 					value := offset
 				}
-		)"};
+		)");
 		w("functionName", functionName);
 		w("readableTypeName", _type.toString(true));
 		w("minimumSize", to_string(_type.calldataEncodedSize(true)));
