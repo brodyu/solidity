@@ -736,9 +736,9 @@ bool SMTChecker::visit(MemberAccess const& _memberAccess)
 
 	auto const& exprType = _memberAccess.expression().annotation().type;
 	solAssert(exprType, "");
+	auto identifier = dynamic_cast<Identifier const*>(&_memberAccess.expression());
 	if (exprType->category() == Type::Category::Magic)
 	{
-		auto identifier = dynamic_cast<Identifier const*>(&_memberAccess.expression());
 		string accessedName;
 		if (identifier)
 			accessedName = identifier->name();
@@ -752,9 +752,14 @@ bool SMTChecker::visit(MemberAccess const& _memberAccess)
 	}
 	else if (accessType->category() == Type::Category::Enum)
 	{
-		auto enumType = dynamic_cast<EnumType const*>(accessType.get());
-		solAssert(enumType, "");
-		defineExpr(_memberAccess, enumType->memberValue(_memberAccess.memberName()));
+		if (identifier && dynamic_cast<EnumDefinition const*>(identifier->annotation().referencedDeclaration))
+		{
+			auto enumType = dynamic_cast<EnumType const*>(accessType.get());
+			solAssert(enumType, "");
+			defineExpr(_memberAccess, enumType->memberValue(_memberAccess.memberName()));
+		}
+		else
+			createExpr(_memberAccess);
 		return false;
 	}
 	else
